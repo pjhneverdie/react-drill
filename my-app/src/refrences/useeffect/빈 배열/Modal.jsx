@@ -15,7 +15,7 @@ export default function Modal({ onClose }) {
         }
 
 
-    }, []); // 빈 배열: 마운트 시 한 번만 실행, 언마운트 시 cleanup 실행
+    }, []); // 빈 배열: 마운트 시 한 번만 실행, 언마운트 시 cleanup 실행.
 
     return (
         <div className="modal">
