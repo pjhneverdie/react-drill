@@ -2,6 +2,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 
+// useFormContext도 필요하면 봐바.
+
 const schema = z.object({
     username: z
         .string()
