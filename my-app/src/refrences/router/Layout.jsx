@@ -1,4 +1,12 @@
-import { BrowserRouter, Routes, Route, NavLink, Outlet } from "react-router-dom";
+import {
+    createBrowserRouter,
+    RouterProvider,
+    Outlet,
+    NavLink,
+    useParams,
+    useSearchParams
+} from "react-router-dom";
+
 
 const navStyle = ({ isActive }) =>
     isActive ? "text-blue-600 font-bold underline" : "text-gray-500 no-underline";
@@ -18,10 +26,10 @@ function Layout() {
 function Dashboard() {
     return (
         <div className="p-4 bg-gray-50 rounded">
-            <h2>Dashboard</h2>
+            <h2 className="text-xl font-bold">Dashboard</h2>
             <nav className="flex gap-3 my-4">
-                <NavLink to="profile" className={navStyle}>Profile</NavLink>
-                <NavLink to="settings" className={navStyle}>Settings</NavLink>
+                <NavLink to="profile/jdoe" className={navStyle}>Profile (jdoe)</NavLink>
+                <NavLink to="settings?theme=dark" className={navStyle}>Settings (Dark)</NavLink>
             </nav>
             <div className="mt-4 p-2 border-l-4 border-blue-400 bg-white">
                 <Outlet />
@@ -30,21 +38,55 @@ function Dashboard() {
     );
 }
 
-function App() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Layout />}> {/* 인덱스 페이지 경로 '/', 컴포넌트 <Layout />. */}
-                    {/* 여기서부터는 하위 경로에서 부모 컴포넌트의 <Outlet />에 어떤 컴포넌트를 매치시킬지 결정하는 거임. */}
-                    <Route index element={<div>Welcome Home!</div>} /> {/* index 속성을 붙이면 부모 라우트랑 정확히 일치할 때 매치시킴 */}
+function Profile() {
+    const { username } = useParams();
+    return <div>User Profile Page for: <strong>{username}</strong></div>;
+}
 
-                    <Route path="dashboard" element={<Dashboard />}>
-                        <Route index element={<div>Select a menu above.</div>} />
-                        <Route path="profile" element={<div>User Profile Page</div>} />
-                        <Route path="settings" element={<div>Account Settings Page</div>} />
-                    </Route>
-                </Route>
-            </Routes>
-        </BrowserRouter>
+function Settings() {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const theme = searchParams.get("theme") || "light";
+
+    return (
+        <div>
+            <p>Account Settings Page (Current Theme: {theme})</p>
+            <button
+                onClick={() => setSearchParams({ theme: 'light' })}
+                className="mr-2 border px-2 text-sm"
+            >
+                Set Light
+            </button>
+            <button
+                onClick={() => setSearchParams({ theme: 'dark' })}
+                className="border px-2 text-sm"
+            >
+                Set Dark
+            </button>
+        </div>
     );
+}
+
+
+// useLoaderData도 잘 써보도록(유저가 데이터 오는 동안 다른 데로 갔을 때 abort처리 잊지 말고, 에러 바운더리도 생각해라).
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Layout />,
+        children: [
+            { index: true, element: <div>Welcome Home!</div> },
+            {
+                path: "dashboard",
+                element: <Dashboard />,
+                children: [
+                    { index: true, element: <div>Select a menu above.</div> },
+                    { path: "profile/:username", element: <Profile /> },
+                    { path: "settings", element: <Settings /> },
+                ],
+            },
+        ],
+    },
+]);
+
+export default function App() {
+    return <RouterProvider router={router} />;
 }
